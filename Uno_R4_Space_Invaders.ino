@@ -1,7 +1,7 @@
 /*
  * Arduino R4 WiFi Space Invaders
  * 
- * version 1.0 July 5, 2023 ++trent m. wyatt
+ * version 1.0 July, 2023 ++trent m. wyatt
  * 
  */
 
@@ -9,18 +9,20 @@
 #include "Arduino_LED_Matrix.h"
 #include <memory.h>
 #include <vector>
+#include <list>
 
 using std::vector;
-typedef char bitmap_t[2][3];
+using std::list;
 
-#define   MAX_Y        8
-#define   MAX_X       12
+#define   MAX_Y   8
+#define   MAX_X   12
+
 #define   FIRE_PIN    A0
 #define   LEFT_PIN    A1
 #define   RIGHT_PIN   A2
 
 int invader_dir = 1;
-ArduinoLEDMatrix matrix;
+
 uint8_t grid[MAX_Y][MAX_X] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -31,6 +33,8 @@ uint8_t grid[MAX_Y][MAX_X] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 };
+
+ArduinoLEDMatrix matrix;
 
 void set(int x, int y) {
     if (x < 0 || x >= 12 || y < 0 || y >= 8) return;
@@ -48,6 +52,8 @@ struct point_t {
     point_t() : x(0), y(0) {}
     point_t(int _x, int _y) : x(_x), y(_y) {}
 };
+
+typedef char bitmap_t[2][3];
 
 class sprite_t : public point_t {
     protected:
@@ -241,6 +247,15 @@ uint32_t last_shot_move = 0;
 uint32_t invader_move_time = 1000;
 uint32_t shot_move_time = 75;
 
+void dbg(struct sprite_t &sprite) {
+    for (int row = 0; row < sprite.height(); row++) {
+        for (int col = 0; col < sprite.width(); col++) {
+            Serial.write(sprite.get(col,row) ? "* " : "  ");
+        }
+        Serial.write('\n');
+    }
+}
+
 void render() {
     memset(grid, 0, sizeof(grid));
     base.set();
@@ -323,6 +338,7 @@ void shoot(int x, int y, int dx, int dy) {
     shots.push_back(shot);
 }
 
+
 void new_game() {
     base.x = 5;
     base.y = 6;
@@ -346,6 +362,8 @@ void new_game() {
     shots.clear();
 }
 
+
+
 void setup() {
     Serial.begin(115200);
     while (!Serial) { }
@@ -353,6 +371,18 @@ void setup() {
     Serial.println("Arduino R4 WiFi Space Invaders");
 
     new_game();
+
+    Serial.println("invader_t");
+    dbg(invaders[0]);
+
+    Serial.println("block_t");
+    dbg(blocks[0]);
+
+    Serial.println("shot_t");
+    dbg(shots[0]);
+
+    Serial.println("base_t");
+    dbg(base);
 
     matrix.begin();
 
@@ -369,8 +399,10 @@ void setup() {
     render();
 }
 
+
 void check_block_collisions() {
-    vector<block_t> next_blocks;
+    list<block_t> next_blocks;
+
     for (block_t &block : blocks) {
         vector<shot_t> next_shots;
         bool keep = true;
@@ -383,16 +415,22 @@ void check_block_collisions() {
                 next_shots.push_back(shot);
             }
         }
+
         if (keep) {
             next_blocks.push_back(block);
         }
         shots = next_shots;
     }
-    blocks = next_blocks;
+
+    blocks.clear();
+    for (auto &block : next_blocks) {
+        blocks.push_back(block);
+    }
 }
 
 void check_invader_collisions() {
-    vector<invader_t> next_invaders;
+    list<invader_t> next_invaders;
+
     for (invader_t &invader : invaders) {
         vector<shot_t> next_shots;
         bool keep = true;
@@ -405,12 +443,18 @@ void check_invader_collisions() {
                 next_shots.push_back(shot);
             }
         }
+
         if (keep) {
             next_invaders.push_back(invader);
         }
         shots = next_shots;
     }
-    invaders = next_invaders;
+
+    invaders.clear();
+    for (auto &invader : next_invaders) {
+        invaders.push_back(invader);
+    }
+
     if (invaders.empty()) {
         new_game();
     }
@@ -431,6 +475,7 @@ void check_base_collisions() {
         }
     }
 }
+
 
 void loop() {
     if (!digitalRead(FIRE_PIN)) {
