@@ -300,7 +300,7 @@ void move_invaders() {
                 break;
             }
             else {
-                if (random(1, 10) == 1) {
+                if (random(1, 10) > 6) {
                     shoot(invader.x + 1, invader.y + 2, 0, 1);
                 }
             }
@@ -309,7 +309,7 @@ void move_invaders() {
 }
 
 void move_shots() {
-    vector<shot_t> next;
+    list<shot_t> next;
 
     if (millis() >= last_shot_move + shot_move_time) {
         last_shot_move = millis();
@@ -325,7 +325,10 @@ void move_shots() {
             }
         }
 
-        shots = next;
+        shots.clear();
+        for (auto &shot : next) {
+            shots.push_back(shot);
+        }
     }
 }
 
