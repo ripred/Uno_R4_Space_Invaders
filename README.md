@@ -1,4 +1,4 @@
-# Space Invaders on the Uno R4 Wifi LED Matrix!
+# Space Invaders on the Uno R4 WiFi LED Matrix!
 
 Quick and Dirty Space Invaders on the Uno R4 WiFi LED Matrix!
 
