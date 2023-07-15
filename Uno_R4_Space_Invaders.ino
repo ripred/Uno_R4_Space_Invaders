@@ -389,8 +389,8 @@ void setup() {
 
     matrix.begin();
 
-    pinMode(A0, INPUT);
-    randomSeed(analogRead(A0));
+    pinMode(A3, INPUT);
+    randomSeed(analogRead(A3));
 
     last_invader_move = millis();
     last_shot_move = millis();
