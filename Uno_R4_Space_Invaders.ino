@@ -37,12 +37,12 @@ uint8_t grid[MAX_Y][MAX_X] = {
 ArduinoLEDMatrix matrix;
 
 void set(int x, int y) {
-    if (x < 0 || x >= 12 || y < 0 || y >= 8) return;
+    if (x < 0 || x >= MAX_X || y < 0 || y >= MAX_Y) return;
     grid[y][x] = 1;
 }
 
 void reset(int x, int y) {
-    if (x < 0 || x >= 12 || y < 0 || y >= 8) return;
+    if (x < 0 || x >= MAX_X || y < 0 || y >= MAX_Y) return;
     grid[y][x] = 0;
 }
 
